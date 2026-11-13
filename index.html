@@ -50,13 +50,22 @@ body{font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;font-weigh
 .rsvp input::placeholder{color:rgba(251,247,239,.65)}
 .rsvp .btn{width:100%;margin-top:16px;border-color:var(--ivory);color:var(--ivory)}
 .rsvp .btn.yes{background:var(--ivory);color:var(--green)}
-.restart{margin-top:26px;background:none;border:none;color:var(--lgold);cursor:pointer;display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:500;font-size:.9rem;letter-spacing:.24em;text-transform:uppercase}
-.restart svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .rise{opacity:0;transform:translateY(14px)}
 .page.active .rise{animation:rise 1s ease forwards;animation-delay:var(--d,0s)}
 @keyframes rise{to{opacity:1;transform:none}}
-.nav{position:fixed;right:24px;bottom:28px;width:52px;height:52px;border-radius:50%;border:1px solid var(--gold);background:var(--green);color:var(--ivory);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5}
-.nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom,0px));translate:-50% 0;width:60px;height:60px;padding:0;border:0;border-radius:50%;cursor:pointer;z-index:5;display:flex;align-items:center;justify-content:center;isolation:isolate;overflow:hidden;color:var(--green);
+background:linear-gradient(135deg,rgba(255,255,255,.07),rgba(255,255,255,.01));
+-webkit-backdrop-filter:blur(2px) saturate(1.5) brightness(1);backdrop-filter:blur(2px) saturate(1.5) brightness(1);
+box-shadow:inset 0 0 0 1px rgba(255,255,255,.55),inset 2px 3px 5px rgba(255,255,255,.5),inset -2px -3px 6px rgba(31,77,63,.16),0 10px 26px rgba(31,77,63,.18),0 2px 6px rgba(0,0,0,.06);
+transition:scale .35s cubic-bezier(.3,1.7,.5,1),color .4s}
+.nav::before{content:'';position:absolute;inset:0;z-index:-1;border-radius:50%;background:radial-gradient(120% 90% at 28% 10%,rgba(255,255,255,.22),rgba(255,255,255,0) 46%),radial-gradient(90% 70% at 75% 100%,rgba(255,255,255,.07),rgba(255,255,255,0) 60%)}
+.nav:active{scale:.9}
+.nav:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.nav.onDark{color:var(--ivory);background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.01));box-shadow:inset 0 0 0 1px rgba(255,255,255,.4),inset 2px 3px 5px rgba(255,255,255,.3),inset -2px -3px 6px rgba(0,0,0,.2),0 10px 26px rgba(0,0,0,.3),0 2px 6px rgba(0,0,0,.12)}
+html.lg .nav{-webkit-backdrop-filter:blur(3px) url(#lg60) saturate(1.7) brightness(1.02);backdrop-filter:blur(3px) url(#lg60) saturate(1.7) brightness(1.02)}
+html.lg .nav.onDark{-webkit-backdrop-filter:blur(3px) url(#lg60) saturate(1.15) brightness(1.06);backdrop-filter:blur(3px) url(#lg60) saturate(1.15) brightness(1.06)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.nav{background:rgba(255,255,255,.72)}.nav.onDark{background:rgba(255,255,255,.22)}}
+.nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .nav.hidden{display:none}
 @media(max-width:480px){.cap{font-size:.82rem;letter-spacing:.2em}.wrap{padding-top:40px}}
 </style>
@@ -95,21 +104,22 @@ body{font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;font-weigh
     <button class="btn yes" id="yes">Joyfully accepts</button>
     <button class="btn" id="no">Regretfully declines</button>
   </div>
-  <button class="restart rise" style="--d:.9s" id="restart" aria-label="Start over"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg> Start over</button>
 </div></section>
 
 <button class="nav" id="next" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+<button class="nav onDark hidden" id="restart" aria-label="Start over"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg></button>
 
 <script>
 (function(){
-  var pages=document.querySelectorAll('.page'),i=0,nav=document.getElementById('next'),last=pages.length-1;
+  var pages=document.querySelectorAll('.page'),i=0,nav=document.getElementById('next'),last=pages.length-1,restartBtn=document.getElementById('restart');
   function show(n){
     i=n;
     pages.forEach(function(p,k){p.classList.toggle('active',k===n)});
     nav.classList.toggle('hidden',n===last);
+    restartBtn.classList.toggle('hidden',n!==last);
   }
   nav.addEventListener('click',function(){if(i<last)show(i+1)});
-  document.getElementById('restart').addEventListener('click',function(){show(0)});
+  restartBtn.addEventListener('click',function(){show(0)});
 
   function sendRsvp(attending){
     var name=document.getElementById('name').value.trim();
@@ -127,6 +137,37 @@ body{font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;font-weigh
     a.download='manju-rohit-wedding.ics';
     document.body.appendChild(a);a.click();a.remove();
   });
+})();
+</script>
+<script>
+(function(){
+if(!navigator.userAgentData||/iPhone|iPad|iPod/.test(navigator.userAgent))return;
+try{
+var NS='http://www.w3.org/2000/svg',svg=document.createElementNS(NS,'svg');
+svg.setAttribute('width','0');svg.setAttribute('height','0');svg.setAttribute('aria-hidden','true');
+svg.style.cssText='position:absolute;pointer-events:none';
+[60].forEach(function(sz){
+var c=document.createElement('canvas');c.width=c.height=sz;
+var g=c.getContext('2d'),d=g.createImageData(sz,sz),r=sz/2,bz=sz*.34;
+for(var j=0;j<sz;j++)for(var i=0;i<sz;i++){
+var dx=i+.5-r,dy=j+.5-r,dist=Math.sqrt(dx*dx+dy*dy),k=(j*sz+i)*4,u=0,v=0;
+if(dist>0&&dist<=r){var t=Math.max(0,(dist-(r-bz))/bz),m=Math.pow(t,1.8);u=dx/dist*m;v=dy/dist*m}
+d.data[k]=128+u*127;d.data[k+1]=128+v*127;d.data[k+2]=128;d.data[k+3]=255}
+g.putImageData(d,0,0);
+var f=document.createElementNS(NS,'filter');
+f.id='lg'+sz;f.setAttribute('filterUnits','userSpaceOnUse');
+f.setAttribute('x','0');f.setAttribute('y','0');f.setAttribute('width',sz);f.setAttribute('height',sz);
+f.setAttribute('color-interpolation-filters','sRGB');
+var im=document.createElementNS(NS,'feImage');
+im.setAttribute('href',c.toDataURL());im.setAttribute('x','0');im.setAttribute('y','0');
+im.setAttribute('width',sz);im.setAttribute('height',sz);im.setAttribute('preserveAspectRatio','none');im.setAttribute('result','map');
+var dm=document.createElementNS(NS,'feDisplacementMap');
+dm.setAttribute('in','SourceGraphic');dm.setAttribute('in2','map');dm.setAttribute('scale',Math.round(sz*.5));
+dm.setAttribute('xChannelSelector','R');dm.setAttribute('yChannelSelector','G');
+f.appendChild(im);f.appendChild(dm);svg.appendChild(f)});
+document.body.appendChild(svg);
+document.documentElement.classList.add('lg')
+}catch(e){}
 })();
 </script>
 </body>
